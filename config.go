@@ -32,29 +32,29 @@ func NewConfig() *Config {
 type Config struct {
 	*flag.FlagSet `json:"-"`
 
-	Mode  string `json:"mode"`
-	Count int `json:"count"`
+	Mode     string `json:"mode"`
+	Count    int    `json:"count"`
 	Compress string `json:"compress"`
-	Method string `json:"method"`
-	Size int `json:"size"`
+	Method   string `json:"method"`
+	Size     int    `json:"size"`
 	/*
-	LogLevel string `toml:"log-level" json:"log-level"`
+		LogLevel string `toml:"log-level" json:"log-level"`
 
-	WorkerCount int `toml:"worker-count" json:"worker-count"`
+		WorkerCount int `toml:"worker-count" json:"worker-count"`
 
-	JobCount int `toml:"job-count" json:"job-count"`
+		JobCount int `toml:"job-count" json:"job-count"`
 
-	Batch int `toml:"batch" json:"batch"`
+		Batch int `toml:"batch" json:"batch"`
 
-	SourceDBCfg util.DBConfig `toml:"source-db" json:"source-db"`
+		SourceDBCfg util.DBConfig `toml:"source-db" json:"source-db"`
 
-	TargetDBCfg util.DBConfig `toml:"target-db" json:"target-db"`
+		TargetDBCfg util.DBConfig `toml:"target-db" json:"target-db"`
 
-	ConfigFile string
+		ConfigFile string
 
-	JobType string `toml:"job-type" json:"job-type"`
+		JobType string `toml:"job-type" json:"job-type"`
 
-	EtherUrl string `toml:"ether-url" json:"ether-url"`
+		EtherUrl string `toml:"ether-url" json:"ether-url"`
 	*/
 }
 

@@ -1,12 +1,11 @@
 package binlog
 
 import (
-	"log"
-	"fmt"
-	"strconv"
-	"hash/crc32"
 	"encoding/binary"
-
+	"fmt"
+	"hash/crc32"
+	"log"
+	"strconv"
 )
 
 var MagicNumber uint32 = 471532804
@@ -15,10 +14,10 @@ var crcTable = crc32.MakeTable(crc32.Castagnoli)
 type MutationType int32
 
 const (
-	Insert MutationType = 0
-	Update MutationType = 1
-	DeleteID MutationType = 2
-	DeletePK MutationType = 3
+	Insert    MutationType = 0
+	Update    MutationType = 1
+	DeleteID  MutationType = 2
+	DeletePK  MutationType = 3
 	DeleteRow MutationType = 3
 )
 
@@ -75,7 +74,7 @@ type Binlog struct {
 }
 
 // | magic word | binlog type | start_ts | commit_ts | prewrite_key length | prewrite_key |
-// | 4 byte     | 1 byte      | 8 byte   | 8 byte    | 4 byte              | N byte       | 
+// | 4 byte     | 1 byte      | 8 byte   | 8 byte    | 4 byte              | N byte       |
 
 // | prewrite_value length | prewrite_value | ddl_query length | ddl_query | ddl_job_id | crc    |
 // | 4 byte                | M byte         | 4 byte           | P byte    | 8 byte     | 4 byte |
@@ -83,14 +82,14 @@ func EncodeBinlog(b *Binlog) []byte {
 	preWriteKeyLen := len(b.PreWriteKey)
 	preWriteValueLen := len(b.PreWriteValue)
 	ddlQueryLen := len(b.DDLQuery)
-	
+
 	dataSize := 4 + 1 + 8 + 8 + 4 + preWriteKeyLen + 4 + preWriteValueLen + 4 + ddlQueryLen + 8 + 4
 	data := make([]byte, dataSize)
 	offset := 0
 
 	// magic word
 	binary.LittleEndian.PutUint32(data[:4], MagicNumber)
-	
+
 	// binlog type
 	copy(data[4:5], []byte(fmt.Sprintf("%d", b.Tp)))
 
@@ -139,7 +138,6 @@ func DecodeBinlog(data []byte) *Binlog {
 	offset := 0
 
 	magicNum := binary.LittleEndian.Uint32(data[:4])
-	log.Print(magicNum)
 	if magicNum != MagicNumber {
 		log.Fatal("wrong magic number")
 	}
@@ -155,23 +153,23 @@ func DecodeBinlog(data []byte) *Binlog {
 	b.CommitTs = binary.LittleEndian.Uint64(data[14:22])
 
 	preWriteKeyLen := binary.LittleEndian.Uint32(data[22:26])
-	b.PreWriteKey = data[26:26+preWriteKeyLen]
+	b.PreWriteKey = data[26 : 26+preWriteKeyLen]
 
 	offset = 26 + int(preWriteKeyLen)
 
-	preWriteValueLen := binary.LittleEndian.Uint32(data[offset:offset+4])
+	preWriteValueLen := binary.LittleEndian.Uint32(data[offset : offset+4])
 	offset += 4
 
-	b.PreWriteValue = data[offset:offset+int(preWriteValueLen)]
+	b.PreWriteValue = data[offset : offset+int(preWriteValueLen)]
 	offset += int(preWriteValueLen)
 
-	ddlQueryLen := binary.LittleEndian.Uint32(data[offset:offset+4])
+	ddlQueryLen := binary.LittleEndian.Uint32(data[offset : offset+4])
 	offset += 4
 
-	b.DDLQuery = data[offset:offset+int(ddlQueryLen)]
+	b.DDLQuery = data[offset : offset+int(ddlQueryLen)]
 	offset += int(ddlQueryLen)
 
-	b.DDLJobID = binary.LittleEndian.Uint64(data[offset:offset+8])
+	b.DDLJobID = binary.LittleEndian.Uint64(data[offset : offset+8])
 
 	crc1 := binary.LittleEndian.Uint32(data[len(data)-4:])
 	crc2 := crc32.Checksum(data[4:len(data)-4], crcTable)

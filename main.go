@@ -1,20 +1,17 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
+	"bytes"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
-	"bytes"
-	"io/ioutil"
-	"encoding/gob"
-	"compress/gzip"
-	//"compress/bzip2"
+	//"encoding/gob"
 	"compress/flate"
-	//"compress/lzw"
+	"compress/gzip"
 	"compress/zlib"
 
-	//"github.com/ngaut/log"
 	"github.com/pingcap/binlog/binlog"
 	"github.com/pingcap/binlog/binlog-pb"
 )
@@ -27,9 +24,8 @@ func main() {
 	}
 
 	var dataSize, dataSizeCompress int
-	var GenerateBinlogTime, DecodeBinlogTime, CompressTime, UnCompressTime, AllTime time.Duration
-	var t1, t2, t3, t4 time.Time
-	var GenerateBinlogFn func(int) []byte
+	var EncodeBinlogTime, DecodeBinlogTime, CompressTime, UnCompressTime time.Duration
+	var GenerateBinlogFn func(int) ([]byte, time.Duration)
 	var DecodeBinlogFn func([]byte)
 	if cfg.Mode == "pb" {
 		GenerateBinlogFn = GenerateBinlogPb
@@ -40,10 +36,7 @@ func main() {
 	}
 
 	for i := 0; i < cfg.Count; i++ {
-		t1 = time.Now()
-		binlog := GenerateBinlogFn(cfg.Size)
-		t2 = time.Now()
-		//fmt.Println(binlog)
+		binlog, encodeT := GenerateBinlogFn(cfg.Size)
 
 		if cfg.Compress == "Y" {
 			t5 := time.Now()
@@ -66,60 +59,59 @@ func main() {
 			dataSizeCompress += len(b)
 		}
 		dataSize += len(binlog)
-		//log.Printf("before compress %d, after %d", len(binlog), len(b))
-		//log.Printf("%v", buf)
-	
-		t3 = time.Now()
 
+		t3 := time.Now()
 		DecodeBinlogFn(binlog)
-		t4 = time.Now()
+		t4 := time.Now()
+
+		EncodeBinlogTime += encodeT
+		DecodeBinlogTime += t4.Sub(t3)
 	}
 
-	GenerateBinlogTime += t2.Sub(t1)
-	DecodeBinlogTime += t4.Sub(t3)
-	AllTime += t4.Sub(t1)
-
-	log.Printf("method :%s, generate binlog: %v, decode binlog: %v, all: %v, data size: %d, compress data size: %d, encode: %v, decode: %v \n", 
-		cfg.Method, GenerateBinlogTime, DecodeBinlogTime, AllTime, dataSize, dataSizeCompress, CompressTime, UnCompressTime)
+	log.Printf("method :%s, encode binlog: %v, decode binlog: %v, data size: %d, compress data size: %d, CompressTime: %v, UnCompressTime: %v \n",
+		cfg.Method, EncodeBinlogTime, DecodeBinlogTime, dataSize, dataSizeCompress, CompressTime, UnCompressTime)
 }
 
-func GenerateBinlogPb(size int) []byte {
-	sequence := make([]binlog_pb.MutationType, 0, 10)
-	for i := 0; i < 10; i++ {
-		sequence = append(sequence, binlog_pb.MutationType_Insert)
-	}
-	mutation := binlog_pb.TableMutation {
-		TableId: 10,
-		InsertedRows: GenerateRows(size),
-		Sequence: sequence,
+func GenerateBinlogPb(size int) ([]byte, time.Duration) {
+	/*
+		sequence := make([]binlog_pb.MutationType, 0, 10)
+		for i := 0; i < 10; i++ {
+			sequence = append(sequence, binlog_pb.MutationType_Insert)
+		}
+		mutation := binlog_pb.TableMutation {
+			TableId: 10,
+			InsertedRows: GenerateRows(size),
+			Sequence: sequence,
+		}
+
+		preWriteValue := &binlog_pb.PrewriteValue {
+			SchemaVersion: 100000,
+			Mutations: []binlog_pb.TableMutation{mutation},
+		}
+
+		p, err := preWriteValue.Marshal()
+		if err != nil {
+			log.Fatal(err)
+		}
+	*/
+
+	b := &binlog_pb.Binlog{
+		Tp:            binlog_pb.BinlogType_Prewrite,
+		StartTs:       randInt64(10, 9999999),
+		CommitTs:      randInt64(10, 9999999),
+		DdlJobId:      randInt64(1, 10000),
+		PrewriteKey:   []byte(randString(1000)),
+		PrewriteValue: []byte(randString(size)),
+		DdlQuery:      []byte(randString(100)),
 	}
 
-	preWriteValue := &binlog_pb.PrewriteValue {
-		SchemaVersion: 100000,
-		Mutations: []binlog_pb.TableMutation{mutation},
-	}
-
-	p, err := preWriteValue.Marshal()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	b := &binlog_pb.Binlog {
-		Tp: binlog_pb.BinlogType_Prewrite,
-		StartTs:  randInt64(10, 9999999),
-		CommitTs: randInt64(10, 9999999),
-		DdlJobId: randInt64(1, 10000),
-		PrewriteKey: []byte(randString(1000)),
-		PrewriteValue: p,
-		DdlQuery:    []byte(randString(100)),
-	}
-	
+	start := time.Now()
 	data, err := b.Marshal()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return data
+	return data, time.Since(start)
 }
 
 func DecodeBinlogPb(data []byte) {
@@ -128,121 +120,71 @@ func DecodeBinlogPb(data []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	p := &binlog_pb.PrewriteValue{}
-	err = p.Unmarshal(b.PrewriteValue)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-
-	//log.Printf("schema version: %d", p.GetSchemaVersion())
+	/*
+		p := &binlog_pb.PrewriteValue{}
+		err = p.Unmarshal(b.PrewriteValue)
+		if err != nil {
+			log.Fatal(err)
+		}
+	*/
 }
 
-func GenerateBinlog(size int) []byte {
-	sequence := make([]binlog.MutationType, 0, 10)
-	for i := 0; i < 10; i++ {
-		sequence = append(sequence, binlog.Insert)
-	}
-	mutation := &binlog.TableMutation {
-		TableID: 10,
-		InsertedRows: GenerateRows(size),
-		Sequence: sequence,
-	}
-
-	preWriteValue := &binlog.PreWriteValue {
-		SchemaVersion: 100000,
-		Mutations: []*binlog.TableMutation{mutation},
-	}
-
-	var p bytes.Buffer
-	enc := gob.NewEncoder(&p)
-	err := enc.Encode(&preWriteValue)
-	if err != nil {
-		log.Fatal("encode:", err)
-	}
-
+func GenerateBinlog(size int) ([]byte, time.Duration) {
 	/*
-	p, err := json.Marshal(preWriteValue)
-	if err != nil {
-		log.Fatal(err)
-	}
+		sequence := make([]binlog.MutationType, 0, 10)
+		for i := 0; i < 10; i++ {
+			sequence = append(sequence, binlog.Insert)
+		}
+		mutation := &binlog.TableMutation {
+			TableID: 10,
+			InsertedRows: GenerateRows(size),
+			Sequence: sequence,
+		}
+
+		preWriteValue := &binlog.PreWriteValue {
+			SchemaVersion: 100000,
+			Mutations: []*binlog.TableMutation{mutation},
+		}
+
+		var p bytes.Buffer
+		enc := gob.NewEncoder(&p)
+		err := enc.Encode(&preWriteValue)
+		if err != nil {
+			log.Fatal("encode:", err)
+		}
 	*/
 
-	b := &binlog.Binlog {
-		Tp: binlog.PreWrite,
-		StartTs:  uint64(randInt64(10, 9999999)),
-		CommitTs: uint64(randInt64(10, 9999999)),
-		DDLJobID: uint64(randInt64(1, 10000)),
-		PreWriteKey: []byte(randString(1000)),
-		PreWriteValue: p.Bytes(),
-		DDLQuery:    []byte(randString(100)),
+	b := &binlog.Binlog{
+		Tp:            binlog.PreWrite,
+		StartTs:       uint64(randInt64(10, 9999999)),
+		CommitTs:      uint64(randInt64(10, 9999999)),
+		DDLJobID:      uint64(randInt64(1, 10000)),
+		PreWriteKey:   []byte(randString(1000)),
+		PreWriteValue: []byte(randString(size)),
+		DDLQuery:      []byte(randString(100)),
 	}
 
-	d := binlog.EncodeBinlog(b)
-	_ = binlog.DecodeBinlog(d)
-
-	var data bytes.Buffer
-	enc = gob.NewEncoder(&data)
-	err = enc.Encode(&b)
-	if err != nil {
-		log.Fatal("encode:", err)
-	}
-	/*
-	data, err := json.Marshal(b)
-	if err != nil {
-		log.Fatal(err)
-	}
-	*/
-
-	return data.Bytes()
+	start := time.Now()
+	return binlog.EncodeBinlog(b), time.Since(start)
 }
 
 func DecodeBinlog(data []byte) {
-	b := &binlog.Binlog{}
-
-	//var buf bytes.Buffer
-	dec := gob.NewDecoder(bytes.NewBuffer(data))
-	err := dec.Decode(&b)
-	if err != nil {
-		log.Fatal("decode:", err)
-	}
-	/*
-	err := json.Unmarshal(data, b)
-	if err != nil {
-		log.Fatal(err)
-	}
-	*/
-
-	p := &binlog.PreWriteValue{}
-
-	dec = gob.NewDecoder(bytes.NewBuffer(b.PreWriteValue))
-	err = dec.Decode(&p)
-	if err != nil {
-		log.Fatal("decode:", err)
-	}
-	/*
-	err = json.Unmarshal(b.PreWriteValue, p)
-	if err != nil {
-		log.Fatal(err)
-	}
-	*/
-
-	//log.Printf("schema version: %d", p.SchemaVersion)
+	_ = binlog.DecodeBinlog(data)
 }
 
 func GenerateRows(size int) [][]byte {
 	result := make([][]byte, 0, 10)
 	for i := 0; i < 10; i++ {
-		tmp := []byte(fmt.Sprintf("abcdefghijklmn%s", randString(size)))
-		result = append(result, tmp)	
+		tmp := []byte(randString(size))
+		result = append(result, tmp)
 	}
 	return result
 }
 
 func encode(in []byte, method string) ([]byte, error) {
-    var (
-        buffer bytes.Buffer
-        out    []byte
+	var (
+		buffer bytes.Buffer
+		out    []byte
 		err    error
 	)
 	switch method {
@@ -284,8 +226,8 @@ func encode(in []byte, method string) ([]byte, error) {
 			return out, err
 		}
 	}
-   
-    return buffer.Bytes(), nil
+
+	return buffer.Bytes(), nil
 }
 
 func decode(in []byte, method string) ([]byte, error) {
@@ -304,9 +246,9 @@ func decode(in []byte, method string) ([]byte, error) {
 		return ioutil.ReadAll(reader)
 	case "zlib":
 		reader, err := zlib.NewReader(bytes.NewReader(in))
-    	if err != nil {
-        	var out []byte
-       		return out, err
+		if err != nil {
+			var out []byte
+			return out, err
 		}
 		defer reader.Close()
 		return ioutil.ReadAll(reader)
