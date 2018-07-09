@@ -40,14 +40,14 @@ func main() {
 
 		if cfg.Compress == "Y" {
 			t5 := time.Now()
-			b, err := encode(binlog, cfg.Method)
+			b, err := compress(binlog, cfg.Method)
 			if err != nil {
 				log.Fatal(err)
 			}
 
 			t6 := time.Now()
 
-			binlog, err = decode(b, cfg.Method)
+			binlog, err = unCompress(b, cfg.Method)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -68,7 +68,7 @@ func main() {
 		DecodeBinlogTime += t4.Sub(t3)
 	}
 
-	log.Printf("method :%s, encode binlog: %v, decode binlog: %v, data size: %d, compress data size: %d, CompressTime: %v, UnCompressTime: %v \n",
+	log.Printf("encode binlog: %v, decode binlog: %v, data size: %d, compress data size: %d, CompressTime: %v, UnCompressTime: %v \n",
 		cfg.Method, EncodeBinlogTime, DecodeBinlogTime, dataSize, dataSizeCompress, CompressTime, UnCompressTime)
 }
 
@@ -181,7 +181,7 @@ func GenerateRows(size int) [][]byte {
 	return result
 }
 
-func encode(in []byte, method string) ([]byte, error) {
+func compress(in []byte, method string) ([]byte, error) {
 	var (
 		buffer bytes.Buffer
 		out    []byte
@@ -230,7 +230,7 @@ func encode(in []byte, method string) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func decode(in []byte, method string) ([]byte, error) {
+func unCompress(in []byte, method string) ([]byte, error) {
 	switch method {
 	case "gzip":
 		reader, err := gzip.NewReader(bytes.NewReader(in))
