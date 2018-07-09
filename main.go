@@ -178,8 +178,8 @@ func GenerateBinlog(size int) []byte {
 		DDLQuery:    []byte(randString(100)),
 	}
 
-	d := b.Encode()
-	log.Printf("data: %s, length: %d", d, len(d))
+	d := binlog.EncodeBinlog(b)
+	_ = binlog.DecodeBinlog(d)
 
 	var data bytes.Buffer
 	enc = gob.NewEncoder(&data)
