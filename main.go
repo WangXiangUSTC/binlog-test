@@ -69,7 +69,7 @@ func main() {
 	}
 
 	log.Printf("encode binlog: %v, decode binlog: %v, data size: %d, compress data size: %d, CompressTime: %v, UnCompressTime: %v \n",
-		cfg.Method, EncodeBinlogTime, DecodeBinlogTime, dataSize, dataSizeCompress, CompressTime, UnCompressTime)
+		EncodeBinlogTime, DecodeBinlogTime, dataSize, dataSizeCompress, CompressTime, UnCompressTime)
 }
 
 func GenerateBinlogPb(size int) ([]byte, time.Duration) {
