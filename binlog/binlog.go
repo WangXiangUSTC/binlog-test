@@ -2,7 +2,7 @@ package binlog
 
 import (
 	"encoding/binary"
-	"fmt"
+	//"fmt"
 	"hash/crc32"
 	"log"
 	"strconv"
@@ -91,7 +91,7 @@ func EncodeBinlog(b *Binlog) []byte {
 	binary.LittleEndian.PutUint32(data[:4], MagicNumber)
 
 	// binlog type
-	copy(data[4:5], []byte(fmt.Sprintf("%d", b.Tp)))
+	copy(data[4:5], []byte(strconv.Itoa(int(b.Tp))))
 
 	// start ts
 	binary.LittleEndian.PutUint64(data[6:14], b.StartTs)
