@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"time"
+
 	//"encoding/gob"
 	"compress/flate"
 	"compress/gzip"
@@ -40,7 +41,7 @@ func main() {
 
 		if cfg.Compress == "Y" {
 			t5 := time.Now()
-			b, err := compress(binlog, cfg.Method)
+			b, err := compress(binlog, cfg.Method, cfg.CompressLevel)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -68,8 +69,8 @@ func main() {
 		DecodeBinlogTime += t4.Sub(t3)
 	}
 
-	log.Printf("encode binlog: %v, decode binlog: %v, data size: %d, compress data size: %d, CompressTime: %v, UnCompressTime: %v \n",
-		EncodeBinlogTime, DecodeBinlogTime, dataSize, dataSizeCompress, CompressTime, UnCompressTime)
+	log.Printf("method: %s, compress level: %d, encode binlog: %v, decode binlog: %v, data size: %d, compress data size: %d, CompressTime: %v, UnCompressTime: %v \n",
+		cfg.Method, cfg.CompressLevel, EncodeBinlogTime, DecodeBinlogTime, dataSize, dataSizeCompress, CompressTime, UnCompressTime)
 }
 
 func GenerateBinlogPb(size int) ([]byte, time.Duration) {
@@ -181,7 +182,7 @@ func GenerateRows(size int) [][]byte {
 	return result
 }
 
-func compress(in []byte, method string) ([]byte, error) {
+func compress(in []byte, method string, compressLevel int) ([]byte, error) {
 	var (
 		buffer bytes.Buffer
 		out    []byte
@@ -200,7 +201,7 @@ func compress(in []byte, method string) ([]byte, error) {
 			return out, err
 		}
 	case "flate":
-		writer, err := flate.NewWriter(&buffer, 1)
+		writer, err := flate.NewWriter(&buffer, compressLevel)
 		if err != nil {
 			//writer.Close()
 			return out, err

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"compress/flate"
 	"flag"
 
-	//"github.com/BurntSushi/toml"
 	"github.com/juju/errors"
 )
 
@@ -16,6 +16,7 @@ func NewConfig() *Config {
 	fs.StringVar(&cfg.Mode, "mode", "normal", "mode")
 	fs.IntVar(&cfg.Count, "count", 10000, "count")
 	fs.StringVar(&cfg.Compress, "compress", "Y", "compress")
+	fs.IntVar(&cfg.CompressLevel, "compress-level", flate.BestSpeed, "compress level")
 	fs.StringVar(&cfg.Method, "method", "gzip", "method")
 	fs.IntVar(&cfg.Size, "size", 1000, "size")
 	return cfg
@@ -25,11 +26,12 @@ func NewConfig() *Config {
 type Config struct {
 	*flag.FlagSet `json:"-"`
 
-	Mode     string `json:"mode"`
-	Count    int    `json:"count"`
-	Compress string `json:"compress"`
-	Method   string `json:"method"`
-	Size     int    `json:"size"`
+	Mode          string `json:"mode"`
+	Count         int    `json:"count"`
+	Compress      string `json:"compress"`
+	CompressLevel int    `json:"compress-level"`
+	Method        string `json:"method"`
+	Size          int    `json:"size"`
 }
 
 // Parse parses flag definitions from the argument list.
