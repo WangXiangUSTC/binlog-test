@@ -69,9 +69,11 @@ jobs:
       run: |
         kubectl config view
 
-    - name: Running Litmus pod delete chaos experiment
-      uses: mayadata-io/github-chaos-actions@v0.1.0
+    — name: Running Litmus pod delete chaos experiment
+      uses: mayadata-io/github-chaos-actions@master
       env:
+        ##Pass kubeconfig data from secret in base 64 encoded form 
+        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         ##If litmus is not installed
         INSTALL_LITMUS: true
         ##Give application info under chaos
@@ -80,7 +82,9 @@ jobs:
         APP_KIND: deployment
         EXPERIMENT_NAME: pod-delete
         ##Custom image can also been used
-        EXPERIMENT_IMAGE: litmuschaos/ansible-runner:latest        
+        EXPERIMENT_IMAGE: litmuschaos/ansible-runner
+        EXPERIMENT_IMAGE_TAG: latest
+        IMAGE_PULL_POLICY: Always     
         TOTAL_CHAOS_DURATION: 30
         CHAOS_INTERVAL: 10
         FORCE: false
