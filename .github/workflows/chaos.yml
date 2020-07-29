@@ -75,7 +75,7 @@ jobs:
       uses: mayadata-io/github-chaos-actions@v0.1.1
       env:
         ##Pass kubeconfig data from secret in base 64 encoded form 
-        KUBE_CONFIG_DATA: ${{ KUBE_CONFIG_DATA }}
+        #KUBE_CONFIG_DATA: ${{ KUBE_CONFIG_DATA }}
         ##If litmus is not installed
         INSTALL_LITMUS: true
         ##Give application info under chaos
