@@ -28,6 +28,7 @@ jobs:
         kubectl get pods -n kube-system
         echo "current-context:" $(kubectl config current-context)
         echo "environment-kubeconfig:" ${KUBECONFIG}
+        helm version
 
     # - name: Creating a KinD cluster
     #   run: |
