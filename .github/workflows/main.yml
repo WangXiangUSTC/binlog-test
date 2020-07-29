@@ -31,6 +31,8 @@ jobs:
       run: |
         echo Add other actions to build,
         echo test, and deploy your project.
+    - name: Kubernetes set context
+      uses: Azure/k8s-set-context@v1
     - name: Deploy to Kubernetes cluster
       uses: Azure/k8s-deploy@v1.1.0
       #with:
