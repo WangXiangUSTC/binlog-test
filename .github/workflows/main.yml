@@ -31,7 +31,33 @@ jobs:
       run: |
         echo Add other actions to build,
         echo test, and deploy your project.
-        
+    - name: Deploy to Kubernetes cluster
+      uses: Azure/k8s-deploy@v1.1.0
+      #with:
+        # Choose the target Kubernetes namespace. If the namespace is not provided, the commands will run in the default namespace.
+        #namespace: # optional
+        # Path to the manifest files which will be used for deployment.
+        #manifests: # default is 
+        # Fully qualified resource URL of the image(s) to be used for substitutions on the manifest files Example: contosodemo.azurecr.io/helloworld:test
+        #images: # optional
+        # Name of a docker-registry secret that has already been set up within the cluster. Each of these secret names are added under imagePullSecrets field for the workloads found in the input manifest files
+        #imagepullsecrets: # optional
+        # Version of kubectl. Installs a specific version of kubectl binary
+        #kubectl-version: # optional
+        # Deployment strategy to be used. Allowed values are none, canary
+        #strategy: # optional, default is none
+        # Traffic split method to be used. Allowed values are pod, smi
+        #traffic-split-method: # optional, default is pod
+        # Baseline and canary replicas count; valid value i.e between 0 to 100.
+        #baseline-and-canary-replicas: # optional, default is 0
+        # Percentage of traffic redirect to canary deployment
+        #percentage: # optional, default is 0
+        # Arguments
+        #args: # optional
+        # deploy/promote/reject
+        #action: # default is deploy
+        # Deploy when a previous deployment already exists. If true then --force argument is added to the apply command.
+        #force: # optional
     - name: "Setup kubeconfig ENV for Github Chaos Action"
       run: | 
         echo ::set-env name=KUBE_CONFIG_DATA::$(base64 -w 0 ~/.kube/config)
