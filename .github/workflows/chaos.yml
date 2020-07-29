@@ -69,7 +69,7 @@ jobs:
       run: |
         kubectl config view
 
-    — name: Running Litmus pod delete chaos experiment
+    - name: Running Litmus pod delete chaos experiment
       uses: mayadata-io/github-chaos-actions@master
       env:
         ##Pass kubeconfig data from secret in base 64 encoded form 
