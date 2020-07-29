@@ -70,6 +70,10 @@ jobs:
     - name: Getting kubeconfig
       run: |
         kubectl config view
+        kubectl cluster-info
+        kubectl get pods -n kube-system
+        echo "current-context:" $(kubectl config current-context)
+        echo "environment-kubeconfig:" ${KUBECONFIG}
 
     - name: Running Litmus pod delete chaos experiment
       uses: WangXiangUSTC/github-chaos-actions@master
