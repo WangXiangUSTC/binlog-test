@@ -32,6 +32,8 @@ jobs:
         helm version
         kubectl version
         ifconfig
+        echo ::set-env name=IP::$(LC_ALL=C ifconfig  | grep -E 'inet.[0-9]' | grep -v '127.0.0.1' | head -1  |awk '{ print $2}')
+        echo "ip:" ${IP}
         helm version
         kubectl version
         kubectl apply -f https://github.com/WangXiangUSTC/chaos-mesh/blob/update_crd/manifests/crd.yaml
