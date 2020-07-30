@@ -31,11 +31,11 @@ jobs:
         echo "environment-kubeconfig:" ${KUBECONFIG}
         helm version
         kubectl version
-        kubectl apply -f https://github.com/chaos-mesh/chaos-mesh/blob/master/manifests/crd.yaml
-        kubectl create ns chaos-testing
+        #kubectl apply -f https://github.com/chaos-mesh/chaos-mesh/blob/master/manifests/crd.yaml
+        #kubectl create ns chaos-testing
         #helm repo update
-        helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
-        kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
+        #helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
+        #kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 
     # - name: Creating a KinD cluster
     #   run: |
@@ -82,28 +82,33 @@ jobs:
         kubectl get pods -n kube-system
         echo "current-context:" $(kubectl config current-context)
         echo "environment-kubeconfig:" ${KUBECONFIG}
+        
+    - name: Run chaos mesh action
+      uses: WangXiangUSTC/chaos-mesh-actions
+      with:
+        CHAOS_KIND: NetworkChaos
 
-    - name: Running Litmus pod delete chaos experiment
-      uses: WangXiangUSTC/github-chaos-actions@master
-      env:
-        ##Pass kubeconfig data from secret in base 64 encoded form 
-        #KUBE_CONFIG_DATA: ${{ KUBE_CONFIG_DATA }}
-        ##If litmus is not installed
-        INSTALL_LITMUS: true
-        ##Give application info under chaos
-        APP_NS: default
-        APP_LABEL: run=nginx
-        APP_KIND: deployment
-        EXPERIMENT_NAME: pod-delete
-        ##Custom image can also been used
-        EXPERIMENT_IMAGE: litmuschaos/ansible-runner
-        EXPERIMENT_IMAGE_TAG: latest
-        IMAGE_PULL_POLICY: Always     
-        TOTAL_CHAOS_DURATION: 30
-        CHAOS_INTERVAL: 10
-        FORCE: false
-        ##Select true if you want to uninstall litmus after chaos
-        LITMUS_CLEANUP: true
+    #- name: Running Litmus pod delete chaos experiment
+    #  uses: WangXiangUSTC/github-chaos-actions@master
+    #  env:
+    #    ##Pass kubeconfig data from secret in base 64 encoded form 
+    #    #KUBE_CONFIG_DATA: ${{ KUBE_CONFIG_DATA }}
+    #    ##If litmus is not installed
+    #    INSTALL_LITMUS: true
+    #    ##Give application info under chaos
+    #    APP_NS: default
+    #    APP_LABEL: run=nginx
+    #    APP_KIND: deployment
+    #    EXPERIMENT_NAME: pod-delete
+    #    ##Custom image can also been used
+    #    EXPERIMENT_IMAGE: litmuschaos/ansible-runner
+    #    EXPERIMENT_IMAGE_TAG: latest
+    #    IMAGE_PULL_POLICY: Always     
+    #    TOTAL_CHAOS_DURATION: 30
+    #    CHAOS_INTERVAL: 10
+    #    FORCE: false
+    #    ##Select true if you want to uninstall litmus after chaos
+    #    LITMUS_CLEANUP: true
 
 
 
