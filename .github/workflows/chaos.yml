@@ -85,7 +85,7 @@ jobs:
         
     - name: Run chaos mesh action
       uses: WangXiangUSTC/chaos-mesh-actions@master
-      with:
+      env:
         CHAOS_KIND: NetworkChaos
 
     #- name: Running Litmus pod delete chaos experiment
