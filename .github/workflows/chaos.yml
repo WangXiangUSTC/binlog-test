@@ -84,7 +84,7 @@ jobs:
         echo "environment-kubeconfig:" ${KUBECONFIG}
         
     - name: Run chaos mesh action
-      uses: WangXiangUSTC/chaos-mesh-actions
+      uses: WangXiangUSTC/chaos-mesh-actions@master
       with:
         CHAOS_KIND: NetworkChaos
 
