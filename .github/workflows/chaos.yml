@@ -29,8 +29,9 @@ jobs:
         echo "current-context:" $(kubectl config current-context)
         echo "environment-kubeconfig:" ${KUBECONFIG}
         helm version
+        kubectl apply -f https://github.com/chaos-mesh/chaos-mesh/blob/master/manifests/crd.yaml
         kubectl create ns chaos-testing
-        helm repo update
+        #helm repo update
         helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
         kubectl get pods --namespace chaos-testing -l app.kubernetes.io/instance=chaos-mesh
 
