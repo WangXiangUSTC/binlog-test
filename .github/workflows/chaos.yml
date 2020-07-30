@@ -31,8 +31,6 @@ jobs:
         echo "environment-kubeconfig:" ${KUBECONFIG}
         helm version
         kubectl version
-        helm version
-        kubectl version
         #kubectl apply -f https://github.com/WangXiangUSTC/chaos-mesh/blob/update_crd/manifests/crd.yaml
         #kubectl create ns chaos-testing
         #helm install chaos-mesh helm/chaos-mesh --namespace=chaos-testing --set chaosDaemon.runtime=containerd --set chaosDaemon.socketPath=/run/containerd/containerd.sock
