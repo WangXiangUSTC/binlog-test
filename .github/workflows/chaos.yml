@@ -29,6 +29,7 @@ jobs:
         echo "current-context:" $(kubectl config current-context)
         echo "environment-kubeconfig:" ${KUBECONFIG}
         helm version
+        kubectl version
         kubectl apply -f https://github.com/chaos-mesh/chaos-mesh/blob/master/manifests/crd.yaml
         kubectl create ns chaos-testing
         #helm repo update
