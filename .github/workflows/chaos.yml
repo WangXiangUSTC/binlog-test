@@ -31,9 +31,6 @@ jobs:
         echo "environment-kubeconfig:" ${KUBECONFIG}
         helm version
         kubectl version
-        ifconfig
-        echo ::set-env name=IP::$(LC_ALL=C ifconfig  | grep -E 'inet.[0-9]' | grep -v '127.0.0.1' | head -1  |awk '{ print $2}')
-        echo "ip: ${IP}" 
         helm version
         kubectl version
         #kubectl apply -f https://github.com/WangXiangUSTC/chaos-mesh/blob/update_crd/manifests/crd.yaml
@@ -80,6 +77,8 @@ jobs:
       run: | 
         echo ::set-env name=KUBE_CONFIG_DATA::$(base64 -w 0 ~/.kube/config)
         echo "base64 kube config:" ${KUBE_CONFIG_DATA}
+        ifconfig
+        echo ::set-env name=IP::$(LC_ALL=C ifconfig  | grep -E 'inet.[0-9]' | grep -v '127.0.0.1' | head -2  | tail -1 |awk '{ print $2}')
     
     - name: Getting kubeconfig
       run: |
