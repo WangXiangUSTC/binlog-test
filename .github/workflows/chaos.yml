@@ -32,7 +32,7 @@ jobs:
       env:
         CHAOS_KIND: NetworkChaos
         CHAOS_DURATION: 30
-        APP_NAME: nginx
+        APP_NAME: busybox
 
     - name: Verify
       run: |
