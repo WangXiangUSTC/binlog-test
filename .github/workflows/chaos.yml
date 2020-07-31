@@ -25,7 +25,7 @@ jobs:
 
     - name: Deploy an application
       run: |
-        kubectl run nginx --image=nginx
+        kubectl apply -f https://raw.githubusercontent.com/chaos-mesh/apps/master/ping-baidu/busybox-statefulset.yaml
         
     - name: Run chaos mesh action
       uses: WangXiangUSTC/chaos-mesh-actions@master
@@ -37,3 +37,4 @@ jobs:
     - name: Verify
       run: |
         echo "do some verify"
+        kubectl exec busybox-0 -n busybox -it -- ping -c 30 baidu.com
