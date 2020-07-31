@@ -33,3 +33,7 @@ jobs:
         CHAOS_KIND: NetworkChaos
         CHAOS_DURATION: 30
         APP_NAME: nginx
+
+    - name: Verify
+      run: |
+        ping -t 30s 127.0.0.1:8080
