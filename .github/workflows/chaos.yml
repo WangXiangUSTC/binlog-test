@@ -36,4 +36,4 @@ jobs:
 
     - name: Verify
       run: |
-        ping -t 30s 127.0.0.1:8080
+        echo "do some verify"
