@@ -30,4 +30,5 @@ jobs:
     - name: Run chaos mesh action
       uses: WangXiangUSTC/chaos-mesh-actions@master
       env:
-        CHAOS_KIND: NetworkChaos 
+        CHAOS_KIND: NetworkChaos
+        CHAOS_DURATION: 30
