@@ -58,10 +58,7 @@ jobs:
 #         kind version
 #         kind create cluster --config=config.yaml
 #         sleep 60
-
-
-    # - name: Create k8s Kind Cluster
-    #   uses: helm/kind-action@v1.0.0-rc.1        
+     
             
     - name: Getting Nodes
       run: |
