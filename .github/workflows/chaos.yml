@@ -38,4 +38,4 @@ jobs:
       run: |
         echo "do some verify"
         ping -c 10 baidu.com
-        kubectl exec busybox-0 -n busybox -it -- ping -c 30 baidu.com
+        kubectl exec busybox-0 -it -n busybox -- ping -c 30 busybox-1.busybox.busybox.svc
