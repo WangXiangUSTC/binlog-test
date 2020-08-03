@@ -30,6 +30,7 @@ jobs:
     - name: Check pods
       run: |
         kubectl get pods -n chaos-testing
+        sleep 5
         kubectl get pods -n busybox
         
     - name: Run chaos mesh action
