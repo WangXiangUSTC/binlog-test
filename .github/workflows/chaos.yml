@@ -27,6 +27,11 @@ jobs:
       run: |
         kubectl apply -f https://raw.githubusercontent.com/chaos-mesh/apps/master/ping-baidu/busybox-statefulset.yaml
         
+    - name: Check pods
+      run: |
+        kubectl get pods -n chaos-testing
+        kubectl get pods -n busybox
+        
     - name: Run chaos mesh action
       uses: WangXiangUSTC/chaos-mesh-actions@master
       env:
